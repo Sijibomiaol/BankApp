@@ -17,6 +17,8 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     CustomerRepository customerRepository;
+    @Autowired
+    TransactionService transactionService;
 
     @Autowired
     EmailService emailService;
@@ -152,6 +154,15 @@ public class CustomerServiceImpl implements CustomerService {
         Customer customerToCredit =optionalCustomerToCredit.get();
         customerToCredit.setAccountBalance(customerToCredit.getAccountBalance().add(creditDebitRequest.getAmount()));
         customerRepository.save(customerToCredit);
+
+        TransactionDto transactionDto = TransactionDto.builder()
+                .accountNumber(customerToCredit.getAccountNumber())
+                .transactionType("Credit")
+                .amount(creditDebitRequest.getAmount())
+                .build();
+
+        transactionService.savedTransaction(transactionDto);
+
         EmailDetails emailDetails = EmailDetails.builder()
                 .recipient(customerToCredit.getEmail())
                 .subject("Credit Alert")
@@ -203,6 +214,15 @@ public class CustomerServiceImpl implements CustomerService {
             BigDecimal updatedBalance = currentBalance.subtract(debitAmount);
             customerToDebit.setAccountBalance(updatedBalance);
             customerRepository.save(customerToDebit);
+        TransactionDto transactionDto = TransactionDto.builder()
+                .accountNumber(customerToDebit.getAccountNumber())
+                .transactionType("Credit")
+                .amount(creditDebitRequest.getAmount())
+                .build();
+
+        transactionService.savedTransaction(transactionDto);
+
+
             EmailDetails emailDetails = EmailDetails.builder()
                     .recipient(customerToDebit.getEmail())
                     .subject("Debit Alert")
@@ -228,8 +248,91 @@ public class CustomerServiceImpl implements CustomerService {
 
         }
 
+        @Override
+        public BankResponse doTransfer(TransferRequest transferRequest) {
+        Optional<Customer> sourceCustomer = customerRepository.findByAccountNumber(transferRequest.getFromAccount());
+        Optional<Customer> targetCustomer = customerRepository.findByAccountNumber(transferRequest.getToAccount());
+        if (sourceCustomer.isEmpty()) {
+            return BankResponse.builder()
+                    .responseCode(AccountUtils.ACCOUNT_NOT_FOUND)
+                    .responseMessage(AccountUtils.ACCOUNT_NOT_FOUND_MESSAGE)
+                    .info(null)
+                    .build();
+        }
+        if (targetCustomer.isEmpty()) {
+            return BankResponse.builder()
+                    .responseMessage(AccountUtils.TARGET_ACCOUNT_FAIL_MESSAGE)
+                    .responseCode(AccountUtils.TARGET_ACCOUNT_FAIL_CODE)
+                    .info(null)
+                    .build();
+        }
+
+
+        BigDecimal currentBalance = sourceCustomer.get().getAccountBalance();
+        BigDecimal debitAmount = transferRequest.getAmount();
+        if (currentBalance.compareTo(debitAmount) < 0) {
+            return BankResponse.builder()
+                    .responseCode(AccountUtils.DEBIT_FAIL_CODE)
+                    .responseMessage(AccountUtils.DEBIT_FAIL_MESSAGE)
+                    .info(null)
+                    .build();
+
+
+        }
+        BigDecimal updatedBalance = currentBalance.subtract(debitAmount);
+        sourceCustomer.get().setAccountBalance(updatedBalance);
+        customerRepository.save(sourceCustomer.get());
+            TransactionDto transactionDtoCredit = TransactionDto.builder()
+                    .accountNumber(sourceCustomer.get().getAccountNumber())
+                    .transactionType("Credit")
+                    .amount(debitAmount)
+                    .build();
+            transactionService.savedTransaction(transactionDtoCredit);
+
+
+        BigDecimal targetCurrentBalance = targetCustomer.get().getAccountBalance();
+        BigDecimal updatedTargetBalance = targetCurrentBalance.add(debitAmount);
+        targetCustomer.get().setAccountBalance(updatedTargetBalance);
+        customerRepository.save(targetCustomer.get());
+            TransactionDto transactionDtoDebit = TransactionDto.builder()
+                    .accountNumber(targetCustomer.get().getAccountNumber())
+                    .transactionType("Debit")
+                    .amount(debitAmount)
+                    .build();
+
+            transactionService.savedTransaction(transactionDtoDebit);
+
+         EmailDetails sourceEmailDetails = EmailDetails.builder()
+                 .recipient(sourceCustomer.get().getEmail())
+                 .subject("Transfer Successful")
+                 .body("Hello " + sourceCustomer.get().getFirstName() + ",\n\n" +
+                         "You have successfully transferred " + debitAmount + " from your account.\n" +
+                         "New balance: " + updatedBalance + "\n\n" +
+                         "Thank you for using our service!")
+                 .build();
+
+         EmailDetails targetEmailDetails = EmailDetails.builder()
+                 .recipient(targetCustomer.get().getEmail())
+                 .subject("Fund Received")
+                 .body("Hello " + targetCustomer.get().getFirstName() + ",\n\n" +
+                         "You have received " + debitAmount + " into your account.\n" +
+                         "New balance: " + updatedTargetBalance + "\n\n" +
+                         "Thank you for using our service!")
+                 .build();
+         emailService.sendEMailAlert(targetEmailDetails);
+         emailService.sendEMailAlert(sourceEmailDetails);
+
+         return BankResponse.builder()
+                 .responseCode(AccountUtils.TRANSER_SUCCESS_CODE)
+                 .responseMessage(AccountUtils.TRANSER_SUCCESS_MESSAGE)
+                 .info(AccountInfo.builder()
+                         .accountName(sourceCustomer.get().getFirstName() + " " + sourceCustomer.get().getLastName())
+                         .accountNumber(sourceCustomer.get().getAccountNumber())
+                         .accountBalance(sourceCustomer.get().getAccountBalance())
+                         .build())
+                 .build();
 
 
 
-
+    }
 }

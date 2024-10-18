@@ -36,6 +36,12 @@ public class AccountUtils {
     public static final String DEBIT_FAIL_CODE = "008";
     public static final String DEBIT_FAIL_MESSAGE = "Insufficient Balance ";
 
+    public static  final String TARGET_ACCOUNT_FAIL_CODE = "009";
+    public static  final String TARGET_ACCOUNT_FAIL_MESSAGE = "Customer Account not found";
+
+    public static  final String TRANSER_SUCCESS_CODE = "010";
+    public static final String TRANSER_SUCCESS_MESSAGE = "Account has been Successfully Transfer ";
+
 
 
 
