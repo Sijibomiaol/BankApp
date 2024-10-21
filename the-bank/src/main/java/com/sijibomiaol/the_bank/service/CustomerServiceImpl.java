@@ -7,6 +7,7 @@ import com.sijibomiaol.the_bank.repository.CustomerRepository;
 import com.sijibomiaol.the_bank.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
@@ -140,6 +141,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
     public BankResponse creditAccount(CreditDebitRequest creditDebitRequest) {
         Optional<Customer> optionalCustomerToCredit = customerRepository.findByAccountNumber(creditDebitRequest.getAccountNumber());
 
@@ -189,6 +191,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
+    @Transactional
     public BankResponse debitAccount(CreditDebitRequest creditDebitRequest) {
         Optional<Customer> optionalCustomerToDebit = customerRepository.findByAccountNumber(creditDebitRequest.getAccountNumber());
 
@@ -249,6 +252,7 @@ public class CustomerServiceImpl implements CustomerService {
         }
 
         @Override
+        @Transactional
         public BankResponse doTransfer(TransferRequest transferRequest) {
         Optional<Customer> sourceCustomer = customerRepository.findByAccountNumber(transferRequest.getFromAccount());
         Optional<Customer> targetCustomer = customerRepository.findByAccountNumber(transferRequest.getToAccount());
