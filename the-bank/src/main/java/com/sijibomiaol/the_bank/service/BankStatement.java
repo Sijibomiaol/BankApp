@@ -5,6 +5,7 @@ import com.itextpdf.text.Font;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.sijibomiaol.the_bank.dto.EmailDetails;
 import com.sijibomiaol.the_bank.entity.Customer;
 import com.sijibomiaol.the_bank.entity.Transaction;
 import com.sijibomiaol.the_bank.repository.CustomerRepository;
@@ -37,6 +38,8 @@ public class BankStatement {
 
     @Autowired
     private CustomerRepository customerRepository;
+    @Autowired
+    private EmailService emailService;
 
 
     public void generateTransactions(String fileName, String accountNumber, LocalDate startDate, LocalDate endDate) throws DocumentException, IOException {
@@ -135,6 +138,15 @@ public class BankStatement {
         }
         document.add(transationListTable);
         document.close();
+
+        EmailDetails emailDetails = EmailDetails.builder()
+                    .recipient(existingCustomer.getEmail())
+                    .subject("Statement of Account")
+                    .body("Kindly find the attached statment")
+                    .attachment(fileName)
+                    .build();
+
+        emailService.sendEmailWithAttachement(emailDetails);
 
     }
         catch (Exception e) {

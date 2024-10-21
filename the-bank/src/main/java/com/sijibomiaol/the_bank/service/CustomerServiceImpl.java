@@ -6,6 +6,7 @@ import com.sijibomiaol.the_bank.entity.Customer;
 import com.sijibomiaol.the_bank.repository.CustomerRepository;
 import com.sijibomiaol.the_bank.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -20,6 +21,9 @@ public class CustomerServiceImpl implements CustomerService {
     CustomerRepository customerRepository;
     @Autowired
     TransactionService transactionService;
+
+//    @Autowired
+//    PasswordEncoder passwordEncoder;
 
     @Autowired
     EmailService emailService;
@@ -56,6 +60,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .phone(customerRequest.getPhone())
                 .email(customerRequest.getEmail())
                 .address(customerRequest.getAddress())
+//                .password(passwordEncoder.encode(customerRequest.getPassword()))
                 .stateofOrigin(customerRequest.getStateofOrigin())
                 .age(customerRequest.getAge())
                 .status("Active")

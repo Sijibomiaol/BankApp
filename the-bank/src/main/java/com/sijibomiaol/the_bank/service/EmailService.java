@@ -4,4 +4,6 @@ import com.sijibomiaol.the_bank.dto.EmailDetails;
 
 public interface EmailService {
     void sendEMailAlert(EmailDetails emailDetails);
+
+    void sendEmailWithAttachement(EmailDetails emailDetails);
 }
