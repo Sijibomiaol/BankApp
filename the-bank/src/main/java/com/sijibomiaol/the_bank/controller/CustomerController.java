@@ -63,6 +63,11 @@ public class CustomerController {
             description = "Htpp Status Success"
     )
 
+    @PostMapping("/login")
+    public BankResponse login(@RequestBody LoginDto loginDto) {
+        return customerService.login(loginDto);
+    }
+
     @GetMapping("/balanceEnquiry")
     public BankResponse getBalanceEnquiry(@RequestBody EnquiryRequest enquiryRequest) {
         return customerService.getBalanceEnquiry(enquiryRequest);

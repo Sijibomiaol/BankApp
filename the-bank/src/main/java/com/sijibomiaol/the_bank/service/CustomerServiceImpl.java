@@ -1,12 +1,16 @@
 package com.sijibomiaol.the_bank.service;
 
 
+import com.sijibomiaol.the_bank.config.JwtTokenProvider;
 import com.sijibomiaol.the_bank.dto.*;
 import com.sijibomiaol.the_bank.entity.Customer;
 import com.sijibomiaol.the_bank.repository.CustomerRepository;
 import com.sijibomiaol.the_bank.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -22,8 +26,15 @@ public class CustomerServiceImpl implements CustomerService {
     @Autowired
     TransactionService transactionService;
 
-//    @Autowired
-//    PasswordEncoder passwordEncoder;
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
+
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
+    AuthenticationManager authManager;
 
     @Autowired
     EmailService emailService;
@@ -60,8 +71,9 @@ public class CustomerServiceImpl implements CustomerService {
                 .phone(customerRequest.getPhone())
                 .email(customerRequest.getEmail())
                 .address(customerRequest.getAddress())
-//                .password(passwordEncoder.encode(customerRequest.getPassword()))
+                .password(passwordEncoder.encode(customerRequest.getPassword()))
                 .stateofOrigin(customerRequest.getStateofOrigin())
+                .role(customerRequest.getRole())
                 .age(customerRequest.getAge())
                 .status("Active")
                 .accountBalance(intialBalance)
@@ -87,6 +99,36 @@ public class CustomerServiceImpl implements CustomerService {
                         .accountBalance(intialBalance)
                         .build())
                 .build();
+    }
+
+    @Override
+    public BankResponse login(LoginDto loginDto){
+
+        Authentication authentication =
+                authManager.authenticate(new UsernamePasswordAuthenticationToken
+                        (loginDto.getEmail(), loginDto.getPassword()));
+
+                if (authentication.isAuthenticated()){
+
+                    EmailDetails loginAlert = EmailDetails.builder()
+                            .subject("You're logged in")
+                            .recipient(loginDto.getEmail())
+                            .body("You are logged in into your account. If you did not initiate this request, please contact the bank")
+                            .build();
+
+                    emailService.sendEMailAlert(loginAlert);
+                    return BankResponse.builder()
+                            .responseCode("Login Successful")
+                            .responseMessage(jwtTokenProvider.generateToken(authentication))
+                            .build();
+
+                }
+
+                return BankResponse.builder()
+                        .responseMessage(AccountUtils.LOGIN_FAILED_MESSAGE)
+                        .responseCode(AccountUtils.LOGIN_FAILED_CODE)
+                        .build();
+
     }
 
     private boolean isValidCustomerRequest(CustomerRequest customerRequest) {

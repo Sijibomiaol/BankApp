@@ -1,5 +1,6 @@
 package com.sijibomiaol.the_bank.dto;
 
+import com.sijibomiaol.the_bank.ENUM.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,6 +19,8 @@ public class CustomerRequest {
     private String otherName;
 
     private int age;
+
+    private Role role;
 
     private String email;
 

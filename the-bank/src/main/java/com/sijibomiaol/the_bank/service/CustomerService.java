@@ -5,6 +5,8 @@ import com.sijibomiaol.the_bank.dto.*;
 public interface CustomerService {
     BankResponse createAccount(CustomerRequest customerRequest);
 
+    BankResponse login(LoginDto loginDto);
+
     BankResponse getBalanceEnquiry(EnquiryRequest enquiryRequest);
 
     BankResponse getNameEnquiry(EnquiryRequest enquiryRequest);

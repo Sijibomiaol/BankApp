@@ -42,6 +42,9 @@ public class AccountUtils {
     public static  final String TRANSER_SUCCESS_CODE = "010";
     public static final String TRANSER_SUCCESS_MESSAGE = "Account has been Successfully Transfer ";
 
+    public static final String LOGIN_FAILED_CODE="011";
+    public static final String LOGIN_FAILED_MESSAGE="Invalid Login Credentials";
+
 
 
 
