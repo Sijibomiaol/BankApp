@@ -7,6 +7,7 @@ import com.sijibomiaol.the_bank.entity.Customer;
 import com.sijibomiaol.the_bank.repository.CustomerRepository;
 import com.sijibomiaol.the_bank.utils.AccountUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,6 +29,8 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     JwtTokenProvider jwtTokenProvider;
+
+
 
 
     @Autowired

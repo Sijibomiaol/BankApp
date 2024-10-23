@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Year;
+import java.util.Random;
 
 @Data
 public class AccountUtils {
@@ -45,6 +46,21 @@ public class AccountUtils {
     public static final String LOGIN_FAILED_CODE="011";
     public static final String LOGIN_FAILED_MESSAGE="Invalid Login Credentials";
 
+    public static final String OTP_SUCCESS_CODE="020";
+    public static final String OTP_SUCCESS_MESSAGE="Account has been Successfully OTP ";
+
+    public static final String VALIDATE_FAIL_CODE="022";
+    public static final String VALIDATE_FAIL_MESSAGE="You have not sent an otp";
+
+    public static final String EXPIRED_OTP_CODE="023";
+    public static final String EXPIRED_OTP_MESSAGE="You have expired otp";
+
+    public static final String INVALID_OTP_CODE= "024";
+    public static final String INCALID_OTP_MESSAGE = "Invalid otp";
+
+    public static final String VALIDATE_OTP_CODE="025";
+    public static final String VALIDATE_OTP_MESSAGE= "Otp Validated";
+
 
 
 
@@ -67,5 +83,20 @@ public class AccountUtils {
         return accountNumber.toString();
 
 
+    }
+
+    public static  String generateOtp(){
+        StringBuilder otp = new StringBuilder();
+        Random random = new Random();
+        int count = 0;
+        while(count<4){
+            otp.append(random.nextInt(10));
+            ++count;
+        }
+        return otp.toString();
+    }
+
+    public static void  main(String[] args) {
+        System.out.println(generateOtp());
     }
 }
